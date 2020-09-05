@@ -1,6 +1,6 @@
 <?php
 
-namespace Meanbee\WebAppManifest\Api\Data;
+namespace M2Boilerplate\WebAppManifest\Api\Data;
 
 interface ManifestInterface
 {

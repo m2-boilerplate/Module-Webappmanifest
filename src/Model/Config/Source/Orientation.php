@@ -1,6 +1,6 @@
 <?php
 
-namespace Meanbee\WebAppManifest\Model\Config\Source;
+namespace M2Boilerplate\WebAppManifest\Model\Config\Source;
 
 class Orientation implements \Magento\Framework\Data\OptionSourceInterface
 {

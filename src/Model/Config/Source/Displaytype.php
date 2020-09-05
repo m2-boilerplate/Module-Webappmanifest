@@ -1,9 +1,14 @@
 <?php
 
-namespace Meanbee\WebAppManifest\Model\Config\Source;
+namespace M2Boilerplate\WebAppManifest\Model\Config\Source;
 
 class Displaytype implements \Magento\Framework\Data\OptionSourceInterface
 {
+    const BROWSER = 'browser';
+    const MINIMAL_UI = 'minimal-ui';
+    const STANDALONE = 'standalone';
+    const FULL_SCREEN = 'fullscreen';
+
     /**
      * @inheritdoc
      */

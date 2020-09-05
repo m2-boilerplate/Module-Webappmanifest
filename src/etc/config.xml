@@ -7,7 +7,7 @@
                 <enable>0</enable>
                 <display_type>browser</display_type>
                 <orientation>any</orientation>
-                <icon_sizes>48x48 72x72 128x128 256x256</icon_sizes>
+                <icon_sizes>48x48 72x72 128x128 192x192 256x256 512x512</icon_sizes>
             </webappmanifest>
         </web>
     </default>

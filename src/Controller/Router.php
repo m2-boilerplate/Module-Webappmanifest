@@ -1,6 +1,6 @@
 <?php
 
-namespace Meanbee\WebAppManifest\Controller;
+namespace M2Boilerplate\WebAppManifest\Controller;
 
 class Router implements \Magento\Framework\App\RouterInterface
 {
@@ -9,12 +9,12 @@ class Router implements \Magento\Framework\App\RouterInterface
     /** @var \Magento\Framework\App\ActionFactory $actionFactory */
     protected $actionFactory;
 
-    /** @var \Meanbee\WebAppManifest\Helper\Config $config */
+    /** @var \M2Boilerplate\WebAppManifest\Helper\Config $config */
     protected $config;
 
     public function __construct(
         \Magento\Framework\App\ActionFactory $actionFactory,
-        \Meanbee\WebAppManifest\Helper\Config $config
+        \M2Boilerplate\WebAppManifest\Helper\Config $config
     ) {
         $this->actionFactory = $actionFactory;
         $this->config = $config;

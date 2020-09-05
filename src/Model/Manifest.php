@@ -1,39 +1,52 @@
 <?php
 
-namespace Meanbee\WebAppManifest\Model;
+namespace M2Boilerplate\WebAppManifest\Model;
 
+use M2Boilerplate\WebAppManifest\Service\Image;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 
-class Manifest implements \Meanbee\WebAppManifest\Api\Data\ManifestInterface
+class Manifest implements \M2Boilerplate\WebAppManifest\Api\Data\ManifestInterface
 {
 
-    const XML_PATH_STORE_INFO_SHORT_NAME = "web/webappmanifest/short_store_name";
-    const XML_PATH_STORE_INFO_NAME = "web/webappmanifest/store_name";
-    const XML_PATH_STORE_INFO_DESCRIPTION = "web/webappmanifest/description";
-    const XML_PATH_STORE_INFO_START_URL = "web/webappmanifest/start_url";
-    const XML_PATH_DISPLAY_THEME_COLOR = "web/webappmanifest/theme_color";
-    const XML_PATH_DISPLAY_BACKGROUND_COLOR = "web/webappmanifest/background_color";
-    const XML_PATH_DISPLAY_DISPLAY_TYPE = "web/webappmanifest/display_type";
-    const XML_PATH_DISPLAY_ORIENTATION = "web/webappmanifest/orientation";
-    const XML_PATH_ICONS_ICON = "web/webappmanifest/icon";
-    const XML_PATH_ICONS_SIZES = "web/webappmanifest/icon_sizes";
+    const XML_PATH_STORE_INFO_SHORT_NAME = 'web/webappmanifest/short_store_name';
+    const XML_PATH_STORE_INFO_NAME = 'web/webappmanifest/store_name';
+    const XML_PATH_STORE_INFO_DESCRIPTION = 'web/webappmanifest/description';
+    const XML_PATH_STORE_INFO_START_URL = 'web/webappmanifest/start_url';
+    const XML_PATH_DISPLAY_THEME_COLOR = 'web/webappmanifest/theme_color';
+    const XML_PATH_DISPLAY_BACKGROUND_COLOR = 'web/webappmanifest/background_color';
+    const XML_PATH_DISPLAY_DISPLAY_TYPE = 'web/webappmanifest/display_type';
+    const XML_PATH_DISPLAY_ORIENTATION = 'web/webappmanifest/orientation';
+    const XML_PATH_ICONS_ICON = 'web/webappmanifest/icon';
+    const XML_PATH_ICONS_SIZES = 'web/webappmanifest/icon_sizes';
 
-    /** @var \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig */
+    /**
+     * @var ScopeConfigInterface $scopeConfig
+     */
     protected $scopeConfig;
 
-    /** @var UrlInterface $urlBuilder */
+    /**
+     * @var UrlInterface $urlBuilder
+     */
     protected $urlBuilder;
 
     /** @var array $data */
     protected $data;
 
+    /**
+     * @var Image
+     */
+    protected $imageService;
+
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        Image $imageService,
+        ScopeConfigInterface $scopeConfig,
         UrlInterface $urlBuilder
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->urlBuilder = $urlBuilder;
+        $this->imageService = $imageService;
         $this->data = [];
 
         $this->populate();
@@ -68,16 +81,16 @@ class Manifest implements \Meanbee\WebAppManifest\Api\Data\ManifestInterface
      */
     protected function populateStoreInformation()
     {
-        $this->populateFromConfig("short_name", static::XML_PATH_STORE_INFO_SHORT_NAME);
-        $this->populateFromConfig("name", static::XML_PATH_STORE_INFO_NAME);
-        $this->populateFromConfig("description", static::XML_PATH_STORE_INFO_DESCRIPTION, true);
+        $this->populateFromConfig('short_name', static::XML_PATH_STORE_INFO_SHORT_NAME);
+        $this->populateFromConfig('name', static::XML_PATH_STORE_INFO_NAME);
+        $this->populateFromConfig('description', static::XML_PATH_STORE_INFO_DESCRIPTION, true);
 
         if ($path = $this->scopeConfig->getValue(static::XML_PATH_STORE_INFO_START_URL, ScopeInterface::SCOPE_STORE)) {
             $start_url = $this->urlBuilder->getDirectUrl($path);
         } else {
             $start_url = $this->urlBuilder->getBaseUrl();
         }
-        $this->data["start_url"] = $start_url;
+        $this->data['start_url'] = $start_url;
 
         return $this;
     }
@@ -89,10 +102,10 @@ class Manifest implements \Meanbee\WebAppManifest\Api\Data\ManifestInterface
      */
     protected function populateDisplayOptions()
     {
-        $this->populateFromConfig("theme_color", static::XML_PATH_DISPLAY_THEME_COLOR, true);
-        $this->populateFromConfig("background_color", static::XML_PATH_DISPLAY_BACKGROUND_COLOR, true);
-        $this->populateFromConfig("display", static::XML_PATH_DISPLAY_DISPLAY_TYPE);
-        $this->populateFromConfig("orientation", static::XML_PATH_DISPLAY_ORIENTATION);
+        $this->populateFromConfig('theme_color', static::XML_PATH_DISPLAY_THEME_COLOR, true);
+        $this->populateFromConfig('background_color', static::XML_PATH_DISPLAY_BACKGROUND_COLOR, true);
+        $this->populateFromConfig('display', static::XML_PATH_DISPLAY_DISPLAY_TYPE);
+        $this->populateFromConfig('orientation', static::XML_PATH_DISPLAY_ORIENTATION);
 
         return $this;
     }
@@ -104,16 +117,27 @@ class Manifest implements \Meanbee\WebAppManifest\Api\Data\ManifestInterface
      */
     protected function populateIcons()
     {
-        if ($icon = $this->scopeConfig->getValue(static::XML_PATH_ICONS_ICON, ScopeInterface::SCOPE_STORE)) {
-            $url = implode("", [
-                $this->urlBuilder->getBaseUrl(["_type" => UrlInterface::URL_TYPE_MEDIA]),
-                "webappmanifest/icons/",
-                $icon,
-            ]);
+        $icon = $this->scopeConfig->getValue(static::XML_PATH_ICONS_ICON, ScopeInterface::SCOPE_STORE);
+        if (!$icon) {
+            return $this;
+        }
 
-            $sizes = $this->scopeConfig->getValue(static::XML_PATH_ICONS_SIZES, ScopeInterface::SCOPE_STORE);
-
-            $this->data["icons"] = [["src" => $url, "sizes" => $sizes]];
+        $this->data['icons'] = [];
+        $sizes = $this->scopeConfig->getValue(static::XML_PATH_ICONS_SIZES, ScopeInterface::SCOPE_STORE);
+        $sizes = explode(' ', $sizes);
+        $sizes = array_map('trim', $sizes);
+        $sizes = array_filter($sizes);
+        foreach ($sizes as $size) {
+            $withAndHeight = explode('x', $size);
+            if (count($withAndHeight) !== 2) {
+                continue;
+            }
+            list($with, $height) = $withAndHeight;
+            $url = $this->imageService->resize((int) $with, (int) $height);
+            if (!$url) {
+                continue;
+            }
+            $this->data['icons'][] = ['src' => $url, 'sizes' => $size, 'purpose' => 'any maskable'];
         }
 
         return $this;
