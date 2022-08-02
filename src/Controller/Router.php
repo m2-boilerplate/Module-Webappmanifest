@@ -24,6 +24,7 @@ class Router implements \Magento\Framework\App\RouterInterface
     {
         if ($this->config->isEnabled() && trim($request->getPathInfo(), "/") == static::MANIFEST_ENDPOINT) {
             $request
+                ->setRouteName("webappmanifest")
                 ->setModuleName("webappmanifest")
                 ->setControllerName("index")
                 ->setActionName("json");
